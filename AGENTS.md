@@ -23,6 +23,11 @@ verified release URL and metadata from `public\updates\latest.json`. Do not
 make an unavailable installer look active, invent a version or checksum, or
 serve an unverified local ZIP.
 
+Vercel serves the `public` directory. The root `index.html`, `site.js`, and
+`style.css` are the maintained source copies and must be mirrored into
+`public` before pushing. Verify the mirrored hashes or content during review;
+otherwise a successful Vercel deployment can still serve an older site bundle.
+
 ## Browser-build handoff
 
 The private `C:\Users\lewis\Documents\Loadline\browser-build` repository
