@@ -1,10 +1,10 @@
 {
-  "version": "0.3.18",
+  "version": "0.3.78",
   "channel": "stable",
   "platform": "windows-x64",
-  "downloadUrl": "https://github.com/powerchoosers/loadline/releases/download/v0.3.18/loadline-browser-windows-x64-0.3.18.zip",
-  "sizeBytes": 602461714,
-  "sha256": "aecf6e5a7c5f9696fc94475a83cf1015eb24a4ed824ebc8e51ef8aa355e4e06d",
-  "publishedAt": "2026-09-11T16:16:46.4862733Z",
-  "releaseNotesUrl": "https://github.com/powerchoosers/loadline/releases/tag/v0.3.18"
+  "downloadUrl": "https://github.com/powerchoosers/loadline/releases/download/v0.3.78/loadline-browser-windows-x64-0.3.78.zip",
+  "sizeBytes": 493146081,
+  "sha256": "4f74461b1ad891ebb0953cd557733741c8d27411b6eec54e669275c1813f99a8",
+  "publishedAt": "2026-09-18T04:32:06.6987324Z",
+  "releaseNotesUrl": "https://github.com/powerchoosers/loadline/releases/tag/v0.3.78"
 }
