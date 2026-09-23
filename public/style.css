@@ -40,7 +40,7 @@ h1{letter-spacing:-.049em}h2{letter-spacing:-.04em}
 @media(prefers-contrast:more){:root{--line:#5f6c64}.screenshot,.detail-image{border-color:#728177}.nav>.nav-download{box-shadow:none}}
 
 /* Product capabilities, grounded in the installed browser. */
-.inner .editorial-list article{border-bottom:0}
+.inner .editorial-list article:last-child{border-bottom:0}
 .feature-story{padding-block:96px 104px}
 .feature-intro{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(220px,.8fr);align-items:center;gap:42px;min-height:260px;margin-bottom:34px}
 .feature-intro>div:first-child{max-width:700px}
