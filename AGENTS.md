@@ -23,6 +23,16 @@ verified release URL and metadata from `public\updates\latest.json`. Do not
 make an unavailable installer look active, invent a version or checksum, or
 serve an unverified local ZIP.
 
+Workspace-only Loadline releases may reuse the verified native browser base
+while replacing only the bundled resources directory. The public manifest
+must still point to the complete, checksum-verified ZIP.
+
+The private browser build uses Cloudflare R2 for compiler caching, not public
+downloads. Its workflow requires an R2 access preflight before the paid Windows
+runner. Workspace-only packages must match the native base's provenance patch
+hash; a native change requires a verified new native build first. The public
+download URL and manifest contract remain unchanged.
+
 Vercel serves the `public` directory. The root `index.html`, `site.js`, and
 `style.css` are the maintained source copies and must be mirrored into
 `public` before pushing. Verify the mirrored hashes or content during review;
