@@ -1,0 +1,41 @@
+:root{color-scheme:dark;--map-page:#171717;--map-line:#4a4a4a;--map-control:#202020;--map-control-hover:#303030;--map-text:#bababa;--map-text-hover:#f2f2f2;--map-active:#d9efe3;--map-active-text:#183226}
+:root[data-workspace-scheme="light"]{color-scheme:light;--map-page:#f3f3f3;--map-line:#d2d6d3;--map-control:#fff;--map-control-hover:#edf2ee;--map-text:#343a36;--map-text-hover:#17221e;--map-active:#d9efe3;--map-active-text:#183226}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--map-page);font:13px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+#map-shell{position:relative;width:100vw;height:100vh;overflow:hidden;background:var(--map-page)}
+#map{position:absolute;inset:0}
+#map-wait,#map-status,#map-error{position:absolute;z-index:4;left:50%;top:50%;max-width:min(90vw,360px);margin:0;padding:10px 14px;border:1px solid var(--map-line);border-radius:9px;background:var(--map-control);color:var(--map-text);box-shadow:0 3px 14px #0005;text-align:center;transform:translate(-50%,-50%)}
+#map-wait{position:fixed}
+#map-error{color:#f0b8ac}
+[hidden]{display:none!important}
+.google-map-type-toggle{position:absolute;z-index:3;top:12px;left:12px;display:flex;overflow:hidden;border:1px solid var(--map-line);border-radius:8px;background:var(--map-control);box-shadow:0 2px 8px #0007}
+.google-map-type-toggle button{min-height:34px;padding:0 12px;border:0;border-right:1px solid var(--map-line);border-radius:0;background:transparent;color:var(--map-text);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.google-map-type-toggle button:last-child{border-right:0}
+.google-map-type-toggle button:hover{background:var(--map-control-hover);color:var(--map-text-hover)}
+.google-map-type-toggle button[aria-pressed="true"]{background:var(--map-active);color:var(--map-active-text)}
+.google-map-type-toggle button:focus-visible,.google-map-control:focus-visible{position:relative;outline:2px solid #9dd9bf;outline-offset:-2px}
+.google-map-control{display:grid;place-items:center;width:36px;height:36px;padding:0;border:1px solid var(--map-line);border-radius:8px;background:var(--map-control);color:var(--map-text-hover);box-shadow:0 2px 8px #0007;cursor:pointer}
+.google-map-control svg{width:18px;height:18px}
+.google-map-control:hover{background:var(--map-control-hover);color:var(--map-text-hover)}
+.google-map-fullscreen{position:absolute;z-index:3;top:12px;right:12px}
+.google-map-controls{position:absolute;z-index:3;right:12px;bottom:12px;display:grid;gap:5px}
+.google-place-card{box-sizing:border-box;width:min(260px,calc(100vw - 96px));max-width:260px;max-height:235px;overflow-x:hidden;overflow-y:auto;padding:0 3px 0 0;color:#17221e;font:13px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+.google-place-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.google-place-kicker{color:#47715d;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.google-place-card h3{overflow-wrap:anywhere;margin:3px 0;font-size:16px;line-height:1.25}
+.google-place-status{max-width:104px;padding:4px 7px;border-radius:999px;background:#e7ece8;color:#52635a;font-size:10px;text-align:right;white-space:normal}
+.google-place-status.open{background:#d7f3df;color:#12633b}
+.google-place-status.closed{background:#f8d9d5;color:#9b3329}
+.google-place-phone{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:13px}
+.google-place-phone .phone-symbol{color:#52635a}
+.google-place-phone button{display:grid;place-items:center;min-width:28px;height:28px;border:1px solid #d8ded9;border-radius:6px;background:#fff;color:#284d3b;cursor:pointer}
+.google-place-phone .use-phone{margin-left:auto;padding:5px 8px;font-size:11px;white-space:nowrap}
+.google-place-hours{margin-top:12px;border-top:1px solid #d8ded9;padding-top:9px}
+.google-place-hours strong{font-size:11px}
+.google-place-hours ul{display:grid;gap:4px;margin:6px 0 0;padding:0;list-style:none;font-size:11px;line-height:1.35}
+.google-place-note{margin:10px 0 0;color:#718078;font-size:11px;line-height:1.45}
+.google-place-card-footer{display:flex;align-items:end;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;font-size:11px}
+.google-place-card-footer a{display:inline-flex;align-items:center;gap:4px;color:#216b4d}
+.google-place-card-footer small{max-width:160px;color:#718078}
+@media(max-width:640px){.google-place-card{width:min(240px,calc(100vw - 78px));max-width:240px}.google-map-type-toggle button{padding:0 10px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}

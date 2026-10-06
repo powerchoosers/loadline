@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-workspace-scheme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="referrer" content="strict-origin">
+    <title>Loadline map</title>
+    <link rel="stylesheet" href="/map-frame.css">
+  </head>
+  <body>
+    <main id="map-shell" aria-label="Loadline account map" hidden>
+      <div id="map" aria-label="Account locations"></div>
+      <p id="map-status" role="status" aria-live="polite">Loading map…</p>
+      <p id="map-error" role="alert" hidden></p>
+      <div id="map-type-toggle" class="google-map-type-toggle" role="group" aria-label="Map display">
+        <button type="button" data-map-type="roadmap" aria-pressed="false">Map</button>
+        <button type="button" data-map-type="satellite" aria-pressed="false">Satellite</button>
+      </div>
+      <button id="map-fullscreen" type="button" class="google-map-control google-map-fullscreen" aria-label="Toggle fullscreen" title="Toggle fullscreen"></button>
+      <div class="google-map-controls" aria-label="Map controls">
+        <button id="map-recenter" type="button" class="google-map-control" aria-label="Center primary location" title="Center primary location"></button>
+        <button id="map-zoom-in" type="button" class="google-map-control" aria-label="Zoom in" title="Zoom in"></button>
+        <button id="map-zoom-out" type="button" class="google-map-control" aria-label="Zoom out" title="Zoom out"></button>
+      </div>
+    </main>
+    <p id="map-wait" role="status">Open this map inside Loadline to view account locations.</p>
+    <script type="module" src="/map-frame.js"></script>
+  </body>
+</html>

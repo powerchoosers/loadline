@@ -3,7 +3,8 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
-const globalHeaders = config.headers.find(entry => entry.source === '/(.*)')?.headers ?? [];
+const globalRule = config.headers.find(entry => entry.source === '/((?!map-frame\\.html$).*)');
+const globalHeaders = globalRule?.headers ?? [];
 const header = name => globalHeaders.find(entry => entry.key.toLowerCase() === name.toLowerCase())?.value;
 
 test('public pages ship a restrictive content security policy with only the Auth API exception', () => {
@@ -31,4 +32,25 @@ test('email callback responses are not cached or indexed', () => {
   const callbackHeaders = config.headers.find(entry => entry.source === '/auth-confirmed.html')?.headers ?? [];
   assert.ok(callbackHeaders.some(entry => entry.key.toLowerCase() === 'cache-control' && entry.value === 'no-store'));
   assert.ok(callbackHeaders.some(entry => entry.key.toLowerCase() === 'x-robots-tag' && entry.value === 'noindex, nofollow'));
+});
+
+test('the hosted map only allows the Loadline extension to frame it', () => {
+  const mapRule = config.headers.find(entry => entry.source === '/map-frame.html');
+  const mapHeaders = mapRule?.headers ?? [];
+  const mapHeader = name => mapHeaders.find(entry => entry.key.toLowerCase() === name.toLowerCase())?.value;
+  const csp = mapHeader('Content-Security-Policy');
+  assert.ok(csp);
+  assert.ok(csp.includes("default-src 'none'"));
+  assert.ok(csp.includes('frame-ancestors chrome-extension://odgjoojkkgncedkjcghhckkmgihjmbge'));
+  assert.ok(csp.includes('https://*.googleapis.com'));
+  assert.ok(csp.includes('https://*.gstatic.com'));
+  assert.equal(mapHeader('Referrer-Policy'), 'strict-origin');
+  assert.equal(mapHeader('Cache-Control'), 'no-store');
+  assert.equal(mapHeader('X-Frame-Options'), undefined);
+
+  const appliesToPage = new RegExp(`^${globalRule.source}$`);
+  assert.equal(appliesToPage.test('/map-frame.html'), false);
+  for (const path of ['/', '/download/', '/auth-confirmed.html', '/map-frame.js']) {
+    assert.equal(appliesToPage.test(path), true, `global security headers must still cover ${path}`);
+  }
 });
