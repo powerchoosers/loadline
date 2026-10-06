@@ -59,3 +59,15 @@ h1{letter-spacing:-.049em}h2{letter-spacing:-.04em}
 .feature-rows p{max-width:690px;margin:0;color:var(--muted);font-size:13px;line-height:1.8}
 @media(max-width:700px){.feature-story{padding-block:64px 72px}.feature-intro{grid-template-columns:1fr;gap:0;margin-bottom:22px}.feature-intro h2{font-size:37px}.feature-sculpture{height:160px;max-width:260px;width:100%;justify-self:center}.feature-sculpture-turn{width:148px;height:124px;margin:-62px 0 0 -74px}.feature-rows article{grid-template-columns:1fr;gap:8px;padding-block:22px}.feature-rows h3{font-size:18px}}
 @media(prefers-reduced-motion:reduce){.feature-sculpture-turn,.feature-sculpture-turn i{animation:none}.feature-sculpture-turn{transform:rotateX(62deg) rotateY(-20deg) rotateZ(-32deg)}.feature-sculpture-turn i{scale:.94 .98;rotate:-8deg}}
+
+.auth-confirmation{min-height:65svh;display:flex;align-items:center;padding-block:clamp(72px,12vw,140px)}
+.auth-confirmation-panel{width:100%;max-width:760px}
+.auth-confirmation h1{max-width:15ch}
+.auth-confirmation .intro{max-width:48rem}
+.auth-confirmation .micro{max-width:44rem;margin-top:20px}
+@media(max-width:720px){.auth-confirmation{min-height:60svh;padding-block:64px}.auth-confirmation .hero-actions{align-items:flex-start;flex-direction:column}}
+.auth-return{padding-block:24px;border-bottom:1px solid var(--line)}
+.auth-return .eyebrow{margin-bottom:10px}
+.auth-return h2{margin-bottom:8px}
+.auth-return .intro{max-width:54rem;margin:0}
+@media(max-width:720px){.auth-confirmation .text-link{min-height:44px;display:inline-flex;align-items:center}}
