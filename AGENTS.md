@@ -33,10 +33,19 @@ runner. Workspace-only packages must match the native base's provenance patch
 hash; a native change requires a verified new native build first. The public
 download URL and manifest contract remain unchanged.
 
-Vercel serves the `public` directory. The root `index.html`, `site.js`, and
-`style.css` are the maintained source copies and must be mirrored into
-`public` before pushing. Verify the mirrored hashes or content during review;
-otherwise a successful Vercel deployment can still serve an older site bundle.
+Vercel serves the `public` directory. The marketing UI is maintained in
+`src/site.jsx`, `src/pages.jsx`, `src/components.jsx`,
+`src/screenshot-viewer.jsx`, `src/feature-navigation.jsx`, and
+`src/site-content.js`. Run `npm ci` and `npm run build` after editing React
+sources. The build mirrors the production `site.js` and its license notice
+into `public`; commit both generated files with the source and lockfile.
+Do not edit the generated JavaScript directly.
+
+Root `index.html`, `style.css`, `enhancements.css`, and
+`release-metadata.mjs` remain maintained source copies and must be mirrored
+into `public` before pushing. Keep the auth callback, map frame, and security
+configuration mirrors synchronized as well. Verify mirrored hashes or content
+during review; a successful Vercel deployment can otherwise serve an old bundle.
 
 ## Browser-build handoff
 
@@ -82,7 +91,7 @@ loading, unavailable, and error states.
 ## Local verification
 
 The public preview normally uses port 5175. Verify `/`, `/download/`,
-`/why-loadline/`, `/how-it-works/`, and `/workspaces/` when those routes are
+`/features/`, `/why-loadline/`, `/how-it-works/`, and `/workspaces/` when those routes are
 changed. Check the download CTA, navigation, mobile layout, console health,
 and manifest response. A successful static build does not prove the live Vercel
 site is current.
