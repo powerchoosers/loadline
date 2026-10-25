@@ -10,12 +10,15 @@
   <body>
     <main id="map-shell" aria-label="Loadline account map" hidden>
       <div id="map" aria-label="Account locations"></div>
+      <div id="map-3d" aria-label="Photorealistic 3D account locations" hidden></div>
+      <aside id="map-3d-place-card" aria-live="polite" hidden></aside>
       <p id="map-status" role="status" aria-live="polite">Loading map…</p>
       <p id="map-error" role="alert" hidden></p>
       <div id="map-type-toggle" class="google-map-type-toggle" role="group" aria-label="Map display">
         <button type="button" data-map-type="roadmap" aria-pressed="false">Map</button>
         <button type="button" data-map-type="satellite" aria-pressed="false">Satellite</button>
       </div>
+      <button id="map-3d-toggle" type="button" class="google-map-control google-map-3d-toggle" aria-label="Toggle 3D view" aria-pressed="false" title="Toggle 3D view">3D</button>
       <button id="map-fullscreen" type="button" class="google-map-control google-map-fullscreen" aria-label="Toggle fullscreen" title="Toggle fullscreen"></button>
       <div class="google-map-controls" aria-label="Map controls">
         <button id="map-recenter" type="button" class="google-map-control" aria-label="Center primary location" title="Center primary location"></button>

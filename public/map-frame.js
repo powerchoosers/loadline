@@ -1,4 +1,6 @@
 const EXTENSION_ORIGIN = 'chrome-extension://odgjoojkkgncedkjcghhckkmgihjmbge';
+const LOADLINE_ORIGIN = 'https://loadlinehq.com';
+const TRUSTED_PARENT_ORIGINS = [EXTENSION_ORIGIN, LOADLINE_ORIGIN];
 const MAX_PAYLOAD_CHARS = 512_000;
 const MAX_PLACES = 1_000;
 
@@ -29,12 +31,13 @@ export function isMapPayload(value) {
       || !(value.focusedId === undefined || boundedString(value.focusedId, 512))
       || !(value.selected === undefined || value.selected === null || isMapPlace(value.selected))
       || !['roadmap', 'satellite'].includes(value.mapType)
+      || !(value.is3d === undefined || typeof value.is3d === 'boolean')
       || !(value.scheme === undefined || value.scheme === 'light' || value.scheme === 'dark')) return false;
   try { return JSON.stringify(value).length <= MAX_PAYLOAD_CHARS; } catch { return false; }
 }
 
-export function isTrustedParentMessage(event, parentWindow, extensionOrigin = EXTENSION_ORIGIN) {
-  if (!event || event.origin !== extensionOrigin || event.source !== parentWindow || !isRecord(event.data)) return false;
+export function isTrustedParentMessage(event, parentWindow, trustedOrigins = TRUSTED_PARENT_ORIGINS) {
+  if (!event || !trustedOrigins.includes(event.origin) || event.source !== parentWindow || !isRecord(event.data)) return false;
   if (event.data.type === 'loadline-map-init') return isMapPayload(event.data.payload);
   return event.data.type === 'loadline-map-theme' && (event.data.scheme === 'light' || event.data.scheme === 'dark');
 }
@@ -42,19 +45,28 @@ export function isTrustedParentMessage(event, parentWindow, extensionOrigin = EX
 function installMapFrame(win, doc) {
   const shell = doc.querySelector('#map-shell');
   const mapNode = doc.querySelector('#map');
+  const map3dNode = doc.querySelector('#map-3d');
+  const map3dPlaceCard = doc.querySelector('#map-3d-place-card');
   const wait = doc.querySelector('#map-wait');
   const status = doc.querySelector('#map-status');
   const error = doc.querySelector('#map-error');
   const markers = [];
+  const markers3d = [];
   let map;
+  let map3d;
+  let map3dReadyTimer;
   let infoWindow;
   let payload;
   let selected;
   let apiPromise;
+  let maps3dPromise;
   let lastLocationKey = '';
-  let reportedReady = false;
+  let last3dLocationKey = '';
+  let last3dTargetKey = '';
+  let map3dSettled = false;
+  let parentOrigin = '';
 
-  const send = message => win.parent.postMessage(message, EXTENSION_ORIGIN);
+  const send = message => { if (parentOrigin) win.parent.postMessage(message, parentOrigin); };
   const showError = message => { error.textContent = message; error.hidden = false; status.hidden = true; };
   const hideError = () => { error.textContent = ''; error.hidden = true; };
   const safeMapsUrl = value => {
@@ -114,6 +126,15 @@ function installMapFrame(win, doc) {
       doc.head.append(script);
     });
     return apiPromise;
+  }
+
+  function loadMaps3d() {
+    if (maps3dPromise) return maps3dPromise;
+    maps3dPromise = win.google.maps.importLibrary('maps3d').catch(cause => {
+      maps3dPromise = undefined;
+      throw cause;
+    });
+    return maps3dPromise;
   }
 
   function placeCard(place) {
@@ -178,6 +199,119 @@ function installMapFrame(win, doc) {
     }
   }
 
+  function primaryLocation() {
+    return payload?.places.find(place => place.id === payload.primaryId && place.latitude !== null && place.longitude !== null)
+      || payload?.places.find(place => place.id === payload.focusedId && place.latitude !== null && place.longitude !== null)
+      || payload?.places.find(place => place.latitude !== null && place.longitude !== null);
+  }
+
+  function focusedLocation() {
+    return payload?.places.find(place => place.id === payload.focusedId && place.latitude !== null && place.longitude !== null)
+      || payload?.places.find(place => place.id === payload.primaryId && place.latitude !== null && place.longitude !== null)
+      || payload?.places.find(place => place.latitude !== null && place.longitude !== null);
+  }
+
+  function render3dMarkers(Marker3DInteractiveElement) {
+    for (const marker of markers3d.splice(0)) marker.remove();
+    for (const place of payload.places) {
+      if (place.latitude === null || place.longitude === null) continue;
+      const marker = new Marker3DInteractiveElement({
+        position: { lat: place.latitude, lng: place.longitude },
+        label: place.id === payload.primaryId ? '★' : '',
+        title: `${place.name}${place.id === payload.primaryId ? ' (Primary location)' : ''}`,
+        drawsWhenOccluded: true,
+      });
+      marker.addEventListener('gmp-click', () => {
+        send({ type: 'loadline-map-select-place', placeId: place.id, fallback: place });
+      });
+      map3d.append(marker);
+      markers3d.push(marker);
+    }
+  }
+
+  function render3dPlaceCard() {
+    map3dPlaceCard.replaceChildren();
+    if (!payload?.selected) {
+      map3dPlaceCard.hidden = true;
+      return;
+    }
+    const close = createElement('button', 'map-3d-place-card-close', 'Close');
+    close.type = 'button';
+    close.addEventListener('click', () => send({ type: 'loadline-map-close-place' }));
+    map3dPlaceCard.append(close, placeCard(payload.selected));
+    map3dPlaceCard.hidden = false;
+  }
+
+  async function show3dMap() {
+    const { Map3DElement, Marker3DInteractiveElement } = await loadMaps3d();
+    const location = focusedLocation();
+    if (!location) throw new Error('Add mapped coordinates to use the 3D view.');
+    const targetKey = JSON.stringify([location.id, location.latitude, location.longitude]);
+    const reuseSettledView = Boolean(map3d) && targetKey === last3dTargetKey && map3dSettled;
+    if (!map3d) {
+      map3d = new Map3DElement({
+        center: { lat: location.latitude, lng: location.longitude, altitude: 0 },
+        range: 1400,
+        tilt: 66,
+        heading: -24,
+        mode: 'SATELLITE',
+        defaultUIHidden: true,
+        gestureHandling: 'GREEDY',
+        description: `Photorealistic 3D map of ${payload.accountName}`,
+      });
+      map3d.addEventListener('gmp-steadychange', event => {
+        if (event.isSteady) {
+          map3dSettled = true;
+          status.hidden = true;
+          if (map3dReadyTimer) win.clearTimeout(map3dReadyTimer);
+          if (!map3dNode.hidden) map3dReadyTimer = win.setTimeout(() => { send({ type: 'loadline-map-map-ready' }); map3dReadyTimer = undefined; }, 800);
+        } else {
+          map3dSettled = false;
+          status.hidden = false;
+          if (map3dReadyTimer) win.clearTimeout(map3dReadyTimer);
+          map3dReadyTimer = undefined;
+        }
+      });
+      map3d.addEventListener('gmp-click', event => {
+        if (!event.placeId) return;
+        event.preventDefault();
+        send({ type: 'loadline-map-select-place', placeId: event.placeId });
+      });
+      map3dNode.replaceChildren(map3d);
+    } else {
+      if (targetKey !== last3dTargetKey) {
+        map3dSettled = false;
+        map3d.center = { lat: location.latitude, lng: location.longitude, altitude: 0 };
+      }
+    }
+    last3dTargetKey = targetKey;
+    if (JSON.stringify([payload.primaryId, payload.places.map(place => [place.id, place.latitude, place.longitude, place.name])]) !== last3dLocationKey) {
+      last3dLocationKey = JSON.stringify([payload.primaryId, payload.places.map(place => [place.id, place.latitude, place.longitude, place.name])]);
+      render3dMarkers(Marker3DInteractiveElement);
+    }
+    mapNode.hidden = true;
+    map3dNode.hidden = false;
+    doc.querySelector('#map-type-toggle').hidden = true;
+    render3dPlaceCard();
+    if (reuseSettledView) win.requestAnimationFrame(() => win.requestAnimationFrame(() => send({ type: 'loadline-map-map-ready' })));
+  }
+
+  function hide3dMap() {
+    const was3dVisible = !map3dNode.hidden;
+    if (map3dReadyTimer) win.clearTimeout(map3dReadyTimer);
+    map3dReadyTimer = undefined;
+    map3dNode.hidden = true;
+    mapNode.hidden = false;
+    map3dPlaceCard.hidden = true;
+    doc.querySelector('#map-type-toggle').hidden = false;
+    if (was3dVisible) win.requestAnimationFrame(() => win.requestAnimationFrame(() => send({ type: 'loadline-map-map-ready' })));
+  }
+
+  function set3dRange(multiplier) {
+    if (!map3d) return;
+    map3d.range = Math.max(80, Math.min(100000, (Number(map3d.range) || 1400) * multiplier));
+  }
+
   function updateViewport() {
     if (!map || !payload) return;
     const focus = payload.places.find(place => place.id === payload.focusedId && place.latitude !== null && place.longitude !== null);
@@ -215,6 +349,10 @@ function installMapFrame(win, doc) {
     for (const button of doc.querySelectorAll('[data-map-type]')) {
       button.setAttribute('aria-pressed', String(button.dataset.mapType === payload.mapType));
     }
+    const threeDButton = doc.querySelector('#map-3d-toggle');
+    threeDButton.disabled = !payload?.places.some(place => place.latitude !== null && place.longitude !== null);
+    threeDButton.setAttribute('aria-pressed', String(Boolean(payload.is3d)));
+    threeDButton.title = threeDButton.disabled ? 'Add a location with coordinates to use 3D view' : 'Toggle photorealistic 3D view';
     const fullscreenButton = doc.querySelector('#map-fullscreen');
     fullscreenButton.setAttribute('aria-label', doc.fullscreenElement ? 'Exit fullscreen' : 'Toggle fullscreen');
     fullscreenButton.title = doc.fullscreenElement ? 'Exit fullscreen' : 'Toggle fullscreen';
@@ -238,6 +376,7 @@ function installMapFrame(win, doc) {
           center: initial ? { lat: initial.latitude, lng: initial.longitude } : { lat: 30.2672, lng: -97.7431 },
           zoom: 17,
           mapTypeId: payload.mapType,
+          renderingType: win.google.maps.RenderingType.VECTOR,
           gestureHandling: 'greedy', mapTypeControl: false, fullscreenControl: false,
           zoomControl: false, cameraControl: false, streetViewControl: false,
         });
@@ -250,19 +389,24 @@ function installMapFrame(win, doc) {
         });
         map.addListener('tilesloaded', () => {
           status.hidden = true;
-          if (!reportedReady) { reportedReady = true; send({ type: 'loadline-map-map-ready' }); }
+          syncControls();
+          send({ type: 'loadline-map-map-ready' });
         });
       }
       const locationKey = JSON.stringify([payload.primaryId, payload.focusedId, payload.places.map(place => [place.id, place.latitude, place.longitude, place.name])]);
-      if (locationKey !== lastLocationKey) {
+      const locationsChanged = locationKey !== lastLocationKey;
+      if (locationsChanged) {
         lastLocationKey = locationKey;
         renderMarkers();
         updateViewport();
       }
       map.setMapTypeId(payload.mapType);
+      if (payload.is3d) await show3dMap();
+      else hide3dMap();
       syncControls();
       selected = payload.selected || null;
-      if (selected) setSelected(selected);
+      if (payload.is3d) render3dPlaceCard();
+      else if (selected) setSelected(selected);
       else infoWindow.close();
     } catch (cause) {
       showError(cause instanceof Error ? cause.message : 'Google Maps could not be loaded. Try again later.');
@@ -276,12 +420,37 @@ function installMapFrame(win, doc) {
     payload = { ...payload, mapType };
     map?.setMapTypeId(mapType); syncControls(); send({ type: 'loadline-map-type', mapType });
   }));
-  doc.querySelector('#map-recenter').addEventListener('click', () => {
-    const primary = payload?.places.find(place => place.id === payload.primaryId) || payload?.places[0];
-    if (primary && primary.latitude !== null && primary.longitude !== null) { map?.panTo({ lat: primary.latitude, lng: primary.longitude }); map?.setZoom(17); }
+  doc.querySelector('#map-3d-toggle').addEventListener('click', () => {
+    if (!payload) return;
+    payload = { ...payload, is3d: !payload.is3d };
+    status.textContent = 'Loading photorealistic 3D map…';
+    status.hidden = !payload.is3d;
+    const nextIs3d = Boolean(payload.is3d);
+    void (async () => {
+      try {
+        if (nextIs3d) await show3dMap();
+        else hide3dMap();
+        syncControls();
+        send({ type: 'loadline-map-3d', is3d: nextIs3d });
+      } catch (cause) {
+        payload = { ...payload, is3d: false };
+        hide3dMap();
+        status.hidden = true;
+        showError(cause instanceof Error ? cause.message : 'Photorealistic 3D Maps could not be loaded.');
+        syncControls();
+        send({ type: 'loadline-map-3d', is3d: false });
+      }
+    })();
   });
-  doc.querySelector('#map-zoom-in').addEventListener('click', () => map?.setZoom(Math.min(21, (map.getZoom() || 17) + 1)));
-  doc.querySelector('#map-zoom-out').addEventListener('click', () => map?.setZoom(Math.max(2, (map.getZoom() || 17) - 1)));
+  doc.querySelector('#map-recenter').addEventListener('click', () => {
+    const primary = primaryLocation();
+    if (primary && primary.latitude !== null && primary.longitude !== null) {
+      if (payload?.is3d && map3d) { map3d.center = { lat: primary.latitude, lng: primary.longitude, altitude: 0 }; map3d.range = 1400; map3d.tilt = 66; map3d.heading = -24; }
+      else { map?.panTo({ lat: primary.latitude, lng: primary.longitude }); map?.setZoom(17); }
+    }
+  });
+  doc.querySelector('#map-zoom-in').addEventListener('click', () => payload?.is3d ? set3dRange(0.72) : map?.setZoom(Math.min(21, (map.getZoom() || 17) + 1)));
+  doc.querySelector('#map-zoom-out').addEventListener('click', () => payload?.is3d ? set3dRange(1.38) : map?.setZoom(Math.max(2, (map.getZoom() || 17) - 1)));
   doc.querySelector('#map-fullscreen').addEventListener('click', () => {
     if (doc.fullscreenElement) void doc.exitFullscreen(); else void doc.documentElement.requestFullscreen?.();
   });
@@ -292,6 +461,7 @@ function installMapFrame(win, doc) {
   win.gm_authFailure = () => showError('Google Maps could not authorize this map. Contact Loadline support if it continues.');
   win.addEventListener('message', event => {
     if (!isTrustedParentMessage(event, win.parent)) return;
+    parentOrigin = event.origin;
     if (event.data.type === 'loadline-map-theme') {
       doc.documentElement.dataset.workspaceScheme = event.data.scheme;
       return;

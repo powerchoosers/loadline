@@ -4,6 +4,11 @@
 html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--map-page);font:13px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
 #map-shell{position:relative;width:100vw;height:100vh;overflow:hidden;background:var(--map-page)}
 #map{position:absolute;inset:0}
+#map-3d{position:absolute;inset:0;width:100%;height:100%}
+#map-3d gmp-map-3d{display:block;width:100%;height:100%}
+#map-3d-place-card{position:absolute;z-index:4;left:12px;bottom:12px;width:min(340px,calc(100% - 72px));max-height:45%;overflow:auto;padding:12px;border:1px solid #d8ded9;border-radius:10px;background:#fff;box-shadow:0 3px 14px #0007}
+#map-3d-place-card .google-place-card{max-width:100%;max-height:none}
+#map-3d-place-card-close{float:right;margin:0 0 6px 8px;border:1px solid #d8ded9;border-radius:6px;padding:4px 7px;background:#fff;color:#284d3b;font:inherit;font-size:11px;cursor:pointer}
 #map-wait,#map-status,#map-error{position:absolute;z-index:4;left:50%;top:50%;max-width:min(90vw,360px);margin:0;padding:10px 14px;border:1px solid var(--map-line);border-radius:9px;background:var(--map-control);color:var(--map-text);box-shadow:0 3px 14px #0005;text-align:center;transform:translate(-50%,-50%)}
 #map-wait{position:fixed}
 #map-error{color:#f0b8ac}
@@ -13,6 +18,9 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--map-p
 .google-map-type-toggle button:last-child{border-right:0}
 .google-map-type-toggle button:hover{background:var(--map-control-hover);color:var(--map-text-hover)}
 .google-map-type-toggle button[aria-pressed="true"]{background:var(--map-active);color:var(--map-active-text)}
+.google-map-3d-toggle{position:absolute;z-index:3;top:12px;right:56px;width:42px;font-size:12px;font-weight:700}
+.google-map-3d-toggle[aria-pressed="true"]{background:var(--map-active);color:var(--map-active-text)}
+.google-map-3d-toggle:disabled{cursor:not-allowed;opacity:.55}
 .google-map-type-toggle button:focus-visible,.google-map-control:focus-visible{position:relative;outline:2px solid #9dd9bf;outline-offset:-2px}
 .google-map-control{display:grid;place-items:center;width:36px;height:36px;padding:0;border:1px solid var(--map-line);border-radius:8px;background:var(--map-control);color:var(--map-text-hover);box-shadow:0 2px 8px #0007;cursor:pointer}
 .google-map-control svg{width:18px;height:18px}
