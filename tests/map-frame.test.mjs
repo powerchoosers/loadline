@@ -42,6 +42,7 @@ test('the hosted HTML sandbox exposes the 3D map and permits its Maps 3D runtime
   assert.match(source, /new Map3DElement\(/);
   assert.match(source, /type: 'loadline-map-3d', is3d: nextIs3d/);
   assert.match(mapFramePolicy, /script-src[^;]*https:\/\/\*\.googleapis\.com/);
+  assert.match(mapFramePolicy, /script-src[^;]*'wasm-unsafe-eval'/);
   assert.match(mapFramePolicy, /frame-ancestors chrome-extension:\/\/odgjoojkkgncedkjcghhckkmgihjmbge/);
   assert.match(mapFramePolicy, /frame-ancestors[^;]*https:\/\/loadlinehq\.com/);
 });

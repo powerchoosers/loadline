@@ -217,7 +217,7 @@ function installMapFrame(win, doc) {
       if (place.latitude === null || place.longitude === null) continue;
       const marker = new Marker3DInteractiveElement({
         position: { lat: place.latitude, lng: place.longitude },
-        label: place.id === payload.primaryId ? '★' : '',
+        ...(place.id === payload.primaryId ? { label: '★' } : {}),
         title: `${place.name}${place.id === payload.primaryId ? ' (Primary location)' : ''}`,
         drawsWhenOccluded: true,
       });
