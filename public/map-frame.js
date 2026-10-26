@@ -246,6 +246,20 @@ function installMapFrame(win, doc) {
     return Boolean(payload?.is3d) && !map3dNode.hidden;
   }
 
+  function clearMap3dReadyTimer() {
+    if (map3dReadyTimer) win.clearTimeout(map3dReadyTimer);
+    map3dReadyTimer = undefined;
+  }
+
+  function scheduleMap3dReady() {
+    status.hidden = true;
+    if (!is3dViewVisible() || map3dReadyTimer) return;
+    map3dReadyTimer = win.setTimeout(() => {
+      map3dReadyTimer = undefined;
+      if (is3dViewVisible()) send({ type: 'loadline-map-map-ready' });
+    }, 800);
+  }
+
   async function show3dMap() {
     const { Map3DElement, Marker3DInteractiveElement } = await loadMaps3d();
     const location = focusedLocation();
@@ -266,19 +280,11 @@ function installMapFrame(win, doc) {
       map3d.addEventListener('gmp-steadychange', event => {
         if (event.isSteady) {
           map3dSettled = true;
-          if (!is3dViewVisible()) return;
-          status.hidden = true;
-          if (map3dReadyTimer) win.clearTimeout(map3dReadyTimer);
-          map3dReadyTimer = win.setTimeout(() => {
-            if (is3dViewVisible()) send({ type: 'loadline-map-map-ready' });
-            map3dReadyTimer = undefined;
-          }, 800);
+          scheduleMap3dReady();
         } else {
-          if (!is3dViewVisible()) return;
           map3dSettled = false;
-          status.hidden = false;
-          if (map3dReadyTimer) win.clearTimeout(map3dReadyTimer);
-          map3dReadyTimer = undefined;
+          status.hidden = true;
+          clearMap3dReadyTimer();
         }
       });
       map3d.addEventListener('gmp-click', event => {
@@ -300,20 +306,15 @@ function installMapFrame(win, doc) {
     }
     mapNode.hidden = true;
     map3dNode.hidden = false;
+    status.hidden = true;
     doc.querySelector('#map-type-toggle').hidden = true;
     render3dPlaceCard();
-    if (reuseSettledView) {
-      status.hidden = true;
-      win.requestAnimationFrame(() => win.requestAnimationFrame(() => {
-        if (is3dViewVisible()) send({ type: 'loadline-map-map-ready' });
-      }));
-    }
+    if (reuseSettledView || map3dSettled) scheduleMap3dReady();
   }
 
   function hide3dMap() {
     const was3dVisible = !map3dNode.hidden;
-    if (map3dReadyTimer) win.clearTimeout(map3dReadyTimer);
-    map3dReadyTimer = undefined;
+    clearMap3dReadyTimer();
     map3dNode.hidden = true;
     mapNode.hidden = false;
     map3dPlaceCard.hidden = true;
@@ -437,8 +438,7 @@ function installMapFrame(win, doc) {
   doc.querySelector('#map-3d-toggle').addEventListener('click', () => {
     if (!payload) return;
     payload = { ...payload, is3d: !payload.is3d };
-    status.textContent = 'Loading photorealistic 3D map…';
-    status.hidden = !payload.is3d;
+    status.hidden = true;
     const nextIs3d = Boolean(payload.is3d);
     void (async () => {
       try {
