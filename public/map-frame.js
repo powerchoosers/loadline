@@ -242,6 +242,10 @@ function installMapFrame(win, doc) {
     map3dPlaceCard.hidden = false;
   }
 
+  function is3dViewVisible() {
+    return Boolean(payload?.is3d) && !map3dNode.hidden;
+  }
+
   async function show3dMap() {
     const { Map3DElement, Marker3DInteractiveElement } = await loadMaps3d();
     const location = focusedLocation();
@@ -262,10 +266,15 @@ function installMapFrame(win, doc) {
       map3d.addEventListener('gmp-steadychange', event => {
         if (event.isSteady) {
           map3dSettled = true;
+          if (!is3dViewVisible()) return;
           status.hidden = true;
           if (map3dReadyTimer) win.clearTimeout(map3dReadyTimer);
-          if (!map3dNode.hidden) map3dReadyTimer = win.setTimeout(() => { send({ type: 'loadline-map-map-ready' }); map3dReadyTimer = undefined; }, 800);
+          map3dReadyTimer = win.setTimeout(() => {
+            if (is3dViewVisible()) send({ type: 'loadline-map-map-ready' });
+            map3dReadyTimer = undefined;
+          }, 800);
         } else {
+          if (!is3dViewVisible()) return;
           map3dSettled = false;
           status.hidden = false;
           if (map3dReadyTimer) win.clearTimeout(map3dReadyTimer);
@@ -293,7 +302,12 @@ function installMapFrame(win, doc) {
     map3dNode.hidden = false;
     doc.querySelector('#map-type-toggle').hidden = true;
     render3dPlaceCard();
-    if (reuseSettledView) win.requestAnimationFrame(() => win.requestAnimationFrame(() => send({ type: 'loadline-map-map-ready' })));
+    if (reuseSettledView) {
+      status.hidden = true;
+      win.requestAnimationFrame(() => win.requestAnimationFrame(() => {
+        if (is3dViewVisible()) send({ type: 'loadline-map-map-ready' });
+      }));
+    }
   }
 
   function hide3dMap() {

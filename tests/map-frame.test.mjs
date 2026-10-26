@@ -40,6 +40,9 @@ test('the hosted HTML sandbox exposes the 3D map and permits its Maps 3D runtime
   assert.match(css, /#map-3d\s+gmp-map-3d\s*\{[^}]*width:\s*100%[^}]*height:\s*100%/s);
   assert.match(source, /importLibrary\('maps3d'\)/);
   assert.match(source, /new Map3DElement\(/);
+  assert.match(source, /function is3dViewVisible\(\)\s*\{\s*return Boolean\(payload\?\.is3d\) && !map3dNode\.hidden;/);
+  assert.equal((source.match(/if \(!is3dViewVisible\(\)\) return;/g) || []).length, 2);
+  assert.match(source, /if \(reuseSettledView\) \{\s*status\.hidden = true;/);
   assert.match(source, /type: 'loadline-map-3d', is3d: nextIs3d/);
   assert.match(mapFramePolicy, /script-src[^;]*https:\/\/\*\.googleapis\.com/);
   assert.match(mapFramePolicy, /script-src[^;]*'wasm-unsafe-eval'/);
