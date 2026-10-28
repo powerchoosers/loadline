@@ -1,10 +1,10 @@
 {
-  "version": "0.3.310",
+  "version": "0.3.312",
   "channel": "stable",
   "platform": "windows-x64",
-  "downloadUrl": "https://github.com/powerchoosers/loadline/releases/download/v0.3.310/loadline-browser-windows-x64-0.3.310.zip",
-  "sizeBytes": 508435293,
-  "sha256": "8d377f77833fad0b05f4793212c0a2971df8da34ad38f5723a7e70843c50f8e9",
-  "publishedAt": "2026-10-27T18:30:26.1307449Z",
-  "releaseNotesUrl": "https://github.com/powerchoosers/loadline/releases/tag/v0.3.310"
+  "downloadUrl": "https://github.com/powerchoosers/loadline/releases/download/v0.3.312/loadline-browser-windows-x64-0.3.312.zip",
+  "sizeBytes": 508481444,
+  "sha256": "759e5d72c1ca4a1326e40193ef58029019906fd132a56ed9e02d02c5108eb86c",
+  "publishedAt": "2026-10-28T14:08:12.0669593Z",
+  "releaseNotesUrl": "https://github.com/powerchoosers/loadline/releases/tag/v0.3.312"
 }
