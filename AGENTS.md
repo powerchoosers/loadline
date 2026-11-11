@@ -23,9 +23,16 @@ verified release URL and metadata from `public\updates\latest.json`. Do not
 make an unavailable installer look active, invent a version or checksum, or
 serve an unverified local ZIP.
 
-Workspace-only Loadline releases may reuse the verified native browser base
-while replacing only the bundled resources directory. The public manifest
-must still point to the complete, checksum-verified ZIP.
+Workspace-only Loadline releases may reuse a verified native package or a
+prior complete workspace package when its embedded provenance confirms the
+same native browser version and patch hash. The workflow verifies the package
+version, source commit, archive checksum, and native patch hash before replacing
+only the bundled resources directory. Keep private workspace package
+artifacts available for 90 days so later fast-path releases can reuse them.
+The public manifest must include the complete, checksum-verified ZIP at
+`downloadUrl` (in-browser updates) and the matching
+`Loadline-Setup-<version>.exe` at `installerDownloadUrl` (website download). The
+site download button and checksum copy use the installer fields.
 
 The private browser build uses Cloudflare R2 for compiler caching, not public
 downloads. Its workflow requires an R2 access preflight before the paid Windows
@@ -40,6 +47,13 @@ Vercel serves the `public` directory. The marketing UI is maintained in
 sources. The build mirrors the production `site.js` and its license notice
 into `public`; commit both generated files with the source and lockfile.
 Do not edit the generated JavaScript directly.
+
+Magic UI registry source snapshots live in `src/components/ui`. The local
+experiment is in `src/magic-experience.jsx` and `src/design-lab.jsx`.
+`src/magic.css` is compiled by Tailwind/PostCSS into generated `magic.css`;
+`showcase.css` is maintained layout CSS. The build mirrors both stylesheets
+and the core site styles into `public`. Keep the registry APIs recognizable
+and document local accessibility or placeholder-slot changes in README.
 
 Root `index.html`, `style.css`, `enhancements.css`, and
 `release-metadata.mjs` remain maintained source copies and must be mirrored

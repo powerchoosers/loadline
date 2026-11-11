@@ -1,4 +1,14 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { Lens } from "./components/ui/lens";
+import { ScrollProgress } from "./components/ui/scroll-progress";
+import { motion, useReducedMotion } from "motion/react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { normalizeRelease } from "../release-metadata.mjs";
 import { workflowPanels } from "./site-content.js";
 
@@ -158,6 +168,7 @@ export function Header({ path }) {
           <span />
         </button>
       </div>
+      <ScrollProgress className="site-progress" aria-hidden="true" />
       <span
         className="reading-progress"
         hidden={path !== "/features"}
@@ -226,6 +237,8 @@ export function Availability() {
 }
 export function ThemeControls({ explorer = false, hidden = false }) {
   const { theme, setTheme } = useContext(SiteContext);
+  const indicatorId = useId();
+  const reducedMotion = useReducedMotion();
   return (
     <div
       className="capture-appearance"
@@ -244,7 +257,21 @@ export function ThemeControls({ explorer = false, hidden = false }) {
             aria-pressed={theme === value}
             onClick={() => setTheme(value)}
           >
-            {value === "light" ? "Light" : "Dark"}
+            {theme === value && (
+              <motion.span
+                className="appearance-indicator"
+                aria-hidden="true"
+                layoutId={indicatorId}
+                transition={
+                  reducedMotion
+                    ? { duration: 0 }
+                    : { type: "spring", stiffness: 420, damping: 36 }
+                }
+              />
+            )}
+            <span className="appearance-label">
+              {value === "light" ? "Light" : "Dark"}
+            </span>
           </button>
         ))}
       </div>
@@ -264,60 +291,43 @@ export function fadeIn(node) {
 function CaptureVisual({ name, priority = false }) {
   const { theme, openCapture } = useContext(SiteContext);
   const visual = useRef(null);
-  const lens = useRef(null);
-  const frame = useRef(0);
+  const [fine, setFine] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [inspecting, setInspecting] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const reduce = useReducedMotion();
   const capture = captures[name];
   const home = name === "home";
+  function measure() {
+    const image = [...(visual.current?.querySelectorAll("img") || [])].find(
+      (node) => node.getBoundingClientRect().width > 0,
+    );
+    if (image?.naturalWidth)
+      setZoom(
+        Math.max(
+          1,
+          Math.min(
+            1.55,
+            image.naturalWidth / image.getBoundingClientRect().width,
+          ),
+        ),
+      );
+  }
   useEffect(() => {
-    const fine = matchMedia("(hover: hover) and (pointer: fine)");
-    const reset = () => {
-      cancelAnimationFrame(frame.current);
-      lens.current.hidden = true;
+    const pointer = matchMedia("(hover: hover) and (pointer: fine)");
+    const update = () => {
+      setFine(pointer.matches);
+      measure();
     };
-    fine.addEventListener("change", reset);
-    reset();
+    pointer.addEventListener("change", update);
+    const observer = new ResizeObserver(measure);
+    observer.observe(visual.current);
+    update();
     return () => {
-      cancelAnimationFrame(frame.current);
-      fine.removeEventListener("change", reset);
+      observer.disconnect();
+      pointer.removeEventListener("change", update);
     };
   }, [theme]);
-  function move(event) {
-    if (
-      event.pointerType !== "mouse" ||
-      !matchMedia("(hover: hover) and (pointer: fine)").matches
-    )
-      return;
-    const pointer = { x: event.clientX, y: event.clientY };
-    cancelAnimationFrame(frame.current);
-    frame.current = requestAnimationFrame(() => {
-      const image = [...visual.current.querySelectorAll("img")].find(
-        (node) => node.getBoundingClientRect().width > 0,
-      );
-      if (!image?.complete || !image.naturalWidth) return;
-      const rect = image.getBoundingClientRect(),
-        parent = visual.current.getBoundingClientRect();
-      const x = pointer.x - rect.left,
-        y = pointer.y - rect.top;
-      if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
-        lens.current.hidden = true;
-        return;
-      }
-      const radius = Math.min(82, rect.width / 2, rect.height / 2);
-      const centerX = Math.max(radius, Math.min(rect.width - radius, x));
-      const centerY = Math.max(radius, Math.min(rect.height - radius, y));
-      const zoom = Math.min(2, image.naturalWidth / rect.width);
-      Object.assign(lens.current.style, {
-        width: `${radius * 2}px`,
-        height: `${radius * 2}px`,
-        left: `${rect.left - parent.left + centerX - radius}px`,
-        top: `${rect.top - parent.top + centerY - radius}px`,
-        backgroundImage: `url("${image.currentSrc}")`,
-        backgroundSize: `${rect.width * zoom}px ${rect.height * zoom}px`,
-        backgroundPosition: `${radius - x * zoom}px ${radius - y * zoom}px`,
-      });
-      lens.current.hidden = false;
-    });
-  }
   function pictures() {
     if (name === "intelligence")
       return (
@@ -367,31 +377,55 @@ function CaptureVisual({ name, priority = false }) {
   return (
     <div
       ref={visual}
+      onLoadCapture={measure}
+      onPointerMove={(event) => {
+        if (!fine || reduce || event.pointerType !== "mouse") return;
+        const bounds = event.currentTarget.getBoundingClientRect();
+        setPosition({
+          x: event.clientX - bounds.left,
+          y: event.clientY - bounds.top,
+        });
+        setInspecting(true);
+      }}
+      onPointerLeave={() => setInspecting(false)}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") setInspecting(false);
+      }}
       className={
         home
           ? "screenshot"
           : `app-capture ${name === "intelligence" ? "native-intelligence" : name}`
       }
-      onPointerMove={move}
-      onPointerLeave={() => {
-        cancelAnimationFrame(frame.current);
-        lens.current.hidden = true;
-      }}
     >
-      {pictures()}
+      {fine && !reduce ? (
+        <Lens
+          zoomFactor={zoom}
+          lensSize={150}
+          duration={0}
+          isStatic={inspecting}
+          position={position}
+          ariaLabel={`Inspect ${capture.title}`}
+        >
+          {pictures()}
+        </Lens>
+      ) : (
+        pictures()
+      )}
       <button
         type="button"
         className="capture-hit"
         aria-label={`Enlarge ${capture.title} screenshot`}
         aria-haspopup="dialog"
-        onClick={(event) => openCapture(name, event.currentTarget)}
+        onClick={(event) => {
+          setInspecting(false);
+          openCapture(name, event.currentTarget);
+        }}
       >
         <span className="capture-inspect-label">
           <ZoomIcon />
           <span>Enlarge</span>
         </span>
       </button>
-      <div ref={lens} className="capture-lens" hidden aria-hidden="true" />
     </div>
   );
 }
@@ -467,12 +501,32 @@ function Lines({ text }) {
 }
 export function WorkflowExplorer() {
   const [active, setActive] = useState(0);
-  const tabs = useRef([]),
-    panels = useRef([]);
+  const reducedMotion = useReducedMotion();
+  const indicatorId = useId();
+  const [vertical, setVertical] = useState(false);
   useEffect(() => {
-    fadeIn(panels.current[active]);
+    const media = matchMedia("(min-width: 701px)");
+    const update = () => setVertical(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  const tabs = useRef([]);
+  const revealSelection = useRef(false);
+  useEffect(() => {
+    if (!revealSelection.current) return;
+    revealSelection.current = false;
+    document
+      .getElementById(`panel-${workflowPanels[active].key}`)
+      ?.scrollIntoView({ behavior: "instant", block: "start" });
   }, [active]);
   function choose(index, focus = false) {
+    const panel = document.getElementById(
+      `panel-${workflowPanels[active].key}`,
+    );
+    revealSelection.current =
+      index !== active &&
+      panel?.getBoundingClientRect().top < (vertical ? 104 : 210);
     setActive(index);
     if (focus) tabs.current[index].focus();
   }
@@ -499,79 +553,104 @@ export function WorkflowExplorer() {
           <p>Explore how Loadline keeps an account moving.</p>
           <ThemeControls explorer hidden={active === 2} />
         </div>
-        <div
-          className="workflow-tabs"
-          role="tablist"
-          aria-label="Explore the Loadline workflow"
-        >
+        <div className="workflow-stage">
+          <div
+            className="workflow-tabs"
+            role="tablist"
+            aria-label="Explore the Loadline workflow"
+            aria-orientation={vertical ? "vertical" : "horizontal"}
+          >
+            {workflowPanels.map((item, index) => (
+              <button
+                key={item.key}
+                ref={(node) => {
+                  tabs.current[index] = node;
+                }}
+                role="tab"
+                type="button"
+                id={`tab-${item.key}`}
+                aria-selected={index === active}
+                aria-controls={`panel-${item.key}`}
+                tabIndex={index === active ? 0 : -1}
+                onClick={() => choose(index)}
+                onKeyDown={(event) => {
+                  const next = {
+                    ArrowRight: (index + 1) % 4,
+                    ArrowDown: (index + 1) % 4,
+                    ArrowLeft: (index + 3) % 4,
+                    ArrowUp: (index + 3) % 4,
+                    Home: 0,
+                    End: 3,
+                  }[event.key];
+                  if (next !== undefined) {
+                    event.preventDefault();
+                    choose(next, true);
+                  }
+                }}
+              >
+                {index === active && (
+                  <motion.span
+                    className="workflow-indicator"
+                    aria-hidden="true"
+                    layoutId={indicatorId}
+                    transition={
+                      reducedMotion
+                        ? { duration: 0 }
+                        : { type: "spring", stiffness: 360, damping: 34 }
+                    }
+                  />
+                )}
+                <span className="workflow-number">{item.number}</span>
+                <span className="workflow-label">{item.label}</span>
+              </button>
+            ))}
+          </div>
           {workflowPanels.map((item, index) => (
-            <button
+            <motion.div
               key={item.key}
-              ref={(node) => {
-                tabs.current[index] = node;
+              initial={false}
+              animate={{
+                opacity: index === active ? 1 : 0,
+                filter:
+                  reducedMotion || index === active ? "blur(0px)" : "blur(5px)",
+                y: reducedMotion || index === active ? 0 : 6,
               }}
-              role="tab"
-              type="button"
-              id={`tab-${item.key}`}
-              aria-selected={index === active}
-              aria-controls={`panel-${item.key}`}
-              tabIndex={index === active ? 0 : -1}
-              onClick={() => choose(index)}
-              onKeyDown={(event) => {
-                const next = {
-                  ArrowRight: (index + 1) % 4,
-                  ArrowLeft: (index + 3) % 4,
-                  Home: 0,
-                  End: 3,
-                }[event.key];
-                if (next !== undefined) {
-                  event.preventDefault();
-                  choose(next, true);
-                }
+              transition={{
+                duration: reducedMotion ? 0 : 0.28,
+                ease: [0.22, 1, 0.36, 1],
               }}
+              className="workflow-panel"
+              id={`panel-${item.key}`}
+              role="tabpanel"
+              aria-labelledby={`tab-${item.key}`}
+              tabIndex={0}
+              hidden={index !== active}
             >
-              <span>{item.number}</span>
-              {item.label}
-            </button>
+              <div className="workflow-copy">
+                <p className="eyebrow">{item.eyebrow}</p>
+                <h3>
+                  <Lines text={item.title} />
+                </h3>
+                <p>{item.body}</p>
+                <ul className="check-list">
+                  {item.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+                <a className="text-link" href={`/features/#${item.key}`}>
+                  Explore {item.label.toLowerCase()} <Arrow />
+                </a>
+              </div>
+              <CaptureFigure
+                name={item.key}
+                className="workflow-visual"
+                caption={
+                  item.caption || "Current development UI · Demonstration data"
+                }
+              />
+            </motion.div>
           ))}
         </div>
-        {workflowPanels.map((item, index) => (
-          <div
-            key={item.key}
-            ref={(node) => {
-              panels.current[index] = node;
-            }}
-            className="workflow-panel"
-            id={`panel-${item.key}`}
-            role="tabpanel"
-            aria-labelledby={`tab-${item.key}`}
-            tabIndex={0}
-            hidden={index !== active}
-          >
-            <div className="workflow-copy">
-              <p className="eyebrow">{item.eyebrow}</p>
-              <h3>
-                <Lines text={item.title} />
-              </h3>
-              <p>{item.body}</p>
-              <ul className="check-list">
-                {item.points.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
-              <a className="text-link" href={`/features/#${item.key}`}>
-                Explore {item.label.toLowerCase()} <Arrow />
-              </a>
-            </div>
-            <CaptureFigure
-              name={item.key}
-              className="workflow-visual"
-              caption={
-                item.caption || "Current development UI · Demonstration data"
-              }
-            />
-          </div>
-        ))}
         <div className="workflow-controls">
           <span className="workflow-position" aria-live="polite">
             {workflowPanels[active].number} / 04 ·{" "}
@@ -630,7 +709,7 @@ export function DownloadProvider({ children }) {
   }, []);
   async function copy() {
     try {
-      await navigator.clipboard.writeText(release.sha256);
+      await navigator.clipboard.writeText(release.installerSha256);
       setCopyStatus("Checksum copied.");
     } catch {
       setCopyStatus("Select the checksum above and copy it manually.");
@@ -662,9 +741,9 @@ export function DownloadValue({ field }) {
         }).format(new Date(release.publishedAt))
       : "—",
     file: release
-      ? `${Math.round(release.sizeBytes / 1048576)} MB · ZIP`
-      : "Windows ZIP",
-    checksum: release?.sha256 || "Available with release metadata",
+      ? `${Math.round(release.installerSizeBytes / 1048576)} MB · Setup`
+      : "Windows installer",
+    checksum: release?.installerSha256 || "Available with release metadata",
     status: release
       ? `Public release · Version ${release.version}`
       : state === "loading"
@@ -682,7 +761,7 @@ export function DownloadButton() {
     <a
       className={`button download-primary${release ? "" : " is-disabled"}`}
       id="latest-download"
-      href={release?.downloadUrl || "/download/"}
+      href={release?.installerDownloadUrl || "/download/"}
       aria-disabled={!release || undefined}
       onClick={(event) => {
         if (!release) event.preventDefault();
