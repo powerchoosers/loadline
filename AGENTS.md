@@ -48,6 +48,15 @@ sources. The build mirrors the production `site.js` and its license notice
 into `public`; commit both generated files with the source and lockfile.
 Do not edit the generated JavaScript directly.
 
+Vercel runs the same `npm run build` on every `main` push. A source file that
+imports a new module must land in the same commit as that module, any new npm
+dependencies, and the rebuilt `public/site.js`. Local-only UI under
+`src/components/ui` or a passing preview does not prove the remote build.
+Before pushing marketing changes that touch `components.jsx` or `site.jsx`,
+run `npm run build` and `npm test`, then include `package.json`,
+`package-lock.json`, tracked `src/components/ui/*` sources, and generated
+`public/site.js` together.
+
 Magic UI registry source snapshots live in `src/components/ui`. The local
 experiment is in `src/magic-experience.jsx` and `src/design-lab.jsx`.
 `src/magic.css` is compiled by Tailwind/PostCSS into generated `magic.css`;
