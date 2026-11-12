@@ -1,5 +1,9 @@
 import { build } from "esbuild";
 import { copyFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 await build({
   entryPoints: ["src/site.jsx"],
@@ -9,6 +13,10 @@ await build({
   format: "esm",
   target: ["es2020"],
   jsx: "automatic",
+  loader: { ".ts": "tsx", ".tsx": "tsx" },
+  alias: {
+    "@": path.join(root, "src"),
+  },
   define: { "process.env.NODE_ENV": '"production"' },
   legalComments: "linked",
 });
