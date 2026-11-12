@@ -1,0 +1,14 @@
+/* Utilities only: the existing site owns typography and the base reset. */
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
+@source "./";
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-primary: var(--mint);
+  --color-primary-foreground: var(--button-ink);
+  --color-muted: var(--surface);
+  --color-muted-foreground: var(--muted);
+  --color-border: var(--line);
+}

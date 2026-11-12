@@ -1,0 +1,215 @@
+/* Product-first composition informed by Mobbin's Rive, Linear, and Ditto references. */
+.site-progress{position:absolute!important;inset:auto 0 -1px!important;height:2px!important;background:var(--mint)!important;z-index:21!important}
+.reading-progress{display:none}
+.showcase-hero{padding-block:84px 58px;text-align:center}
+.showcase-hero .eyebrow{margin-bottom:28px}
+.showcase-hero h1{font-size:clamp(58px,7.6vw,110px);line-height:1.02;letter-spacing:-.065em;max-width:1120px;margin:0 auto 30px;font-weight:600}
+.showcase-hero h1 .premium-heading-lines{color:var(--fg)}
+.premium-heading-lines>span[aria-hidden]{color:var(--fg)}
+.premium-heading-lines>span[aria-hidden]:last-child{color:var(--muted)}
+.showcase-hero .headline-line{color:var(--fg)}
+.showcase-hero .headline-line:last-child{color:var(--muted)}
+.showcase-hero .intro{max-width:660px;margin:0 auto 30px;font-size:18px;line-height:1.7}
+.showcase-hero .micro{margin-top:22px}
+.film-stage{max-width:1200px}
+.product-film{width:100%}
+.product-film>button{display:block;width:100%;overflow:hidden;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.product-film>button>img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;border:0;border-radius:0;box-shadow:none;transition:filter 180ms ease}
+.product-film>button>div{transform:none!important}
+.product-film>button>div>div{width:104px;height:104px;background:#101715c9;backdrop-filter:none}
+.product-film>button>div>div>div{width:70px;height:70px;background:var(--mint);box-shadow:none;transform:none!important}
+.product-film>button>div svg{color:var(--button-ink);fill:var(--button-ink);width:26px;height:26px;filter:none!important}
+.product-film>button:hover{border-color:var(--muted)}
+.film-caption{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 0 24px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.7}
+.film-caption>span:first-child{color:var(--fg);font-weight:600}
+.film-caption>span:last-child{display:flex;align-items:center;gap:12px}
+.film-caption svg{width:16px;height:16px}
+.editorial-intro{display:grid;grid-template-columns:1.1fr 1fr;gap:0 100px;padding-block:110px 98px;align-items:end}
+.editorial-intro .eyebrow{grid-column:1/-1}
+.editorial-intro h2{margin:0;font-size:clamp(36px,4.3vw,60px)}
+.editorial-intro>p:last-child{color:var(--muted);max-width:460px;margin:0;font-size:16px;line-height:1.9}
+.immersive-home .product-section{padding-block:88px 58px}
+.immersive-home .product-section>.wrap{display:grid;grid-template-columns:.65fr 1.35fr;gap:0 70px}
+.immersive-home .product-section .section-heading{grid-column:1/-1;margin-bottom:44px}
+.immersive-home .workflow-tabs{grid-column:1;grid-row:2;display:flex;flex-direction:column;justify-content:flex-start;border:0;margin-top:0}
+.immersive-home .workflow-tabs button,.immersive-home .workflow-tabs button:first-child{padding:20px 18px;min-height:74px;border:0;border-bottom:1px solid var(--line);border-radius:0;font-size:17px;gap:18px;box-shadow:none;text-align:left}
+.immersive-home .workflow-tabs button[aria-selected=true]{background:var(--surface);box-shadow:inset 2px 0 var(--mint)}
+.immersive-home .workflow-tabs button span{font-size:11px;color:var(--muted)}
+.immersive-home .workflow-panel{grid-column:2;grid-row:2;display:flex;flex-direction:column;align-items:stretch;gap:24px;min-height:0;padding:0}
+.immersive-home .workflow-copy>p:not(.eyebrow){max-width:640px;margin-bottom:0;font-size:15px;line-height:1.8}
+.immersive-home .workflow-copy>.eyebrow,.immersive-home .workflow-copy>.check-list,.immersive-home .workflow-copy>.text-link{display:none}
+.immersive-home .workflow-copy h3{font-size:38px;margin-bottom:18px}
+.immersive-home .workflow-visual .app-capture.accounts{max-width:420px}
+.immersive-home .workflow-visual .app-capture.followup{max-width:570px}
+.immersive-home .workflow-controls{grid-column:2}
+.immersive-home .availability-note{grid-column:1/-1}
+.intelligence-spotlight{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;padding-block:105px}
+.intelligence-spotlight h2{font-size:clamp(38px,4.2vw,60px)}
+.intelligence-spotlight>div>p:not(.eyebrow){font-size:16px;color:var(--muted);line-height:1.85;max-width:460px}
+.intelligence-spotlight figure{max-width:370px;margin-inline:auto}
+.intelligence-spotlight figcaption{justify-content:center;flex-wrap:wrap;gap:5px 15px;text-align:center}
+.immersive-home .faq{border-top:1px solid var(--line)}
+.immersive-why .showcase-hero{padding-bottom:78px}
+.connected-work{padding-block:70px 35px;border-top:1px solid var(--line)}
+.connected-work .section-heading{max-width:820px;margin-bottom:50px}
+.connected-work .section-heading>p:not(.eyebrow){color:var(--muted)}
+.connection-track{position:relative;display:grid;grid-template-columns:repeat(4,1fr);isolation:isolate;padding-top:5px}
+.connection-track:before{content:'';position:absolute;top:32px;left:12.5%;right:12.5%;height:1px;background:var(--line);z-index:-1}
+.connection-track>button{display:flex;flex-direction:column;align-items:center;gap:8px;background:transparent;border:0;padding:0 0 16px;min-height:126px;color:var(--muted);font-size:14px}
+.connection-node{display:flex;align-items:center;justify-content:center;width:54px;height:54px;border:1px solid var(--line);border-radius:8px;background:var(--bg);position:relative;z-index:2}
+.connection-node svg{width:22px;height:22px}
+.connection-track>button[aria-selected=true]{color:var(--fg)}
+.connection-track>button[aria-selected=true] .connection-node{border-color:var(--mint);color:var(--mint)}
+.connection-track>button:hover .connection-node{background:var(--surface)}
+.connection-number{font-size:10px;line-height:1.2;letter-spacing:.06em}
+.connection-beams{position:absolute;inset:0;z-index:1;pointer-events:none}
+.connected-panel{display:grid;grid-template-columns:.75fr 1.25fr;gap:75px;align-items:center;padding-block:55px;border-top:1px solid var(--line)}
+.connected-panel h3{font-size:clamp(30px,3.4vw,44px);letter-spacing:-.04em}
+.connected-panel>div>p:not(.eyebrow){color:var(--muted);font-size:15px;line-height:1.85}
+.connected-panel .text-link{margin-top:18px}
+.connected-panel figure{max-width:480px;margin-inline:auto}
+.connected-panel figcaption{flex-wrap:wrap;justify-content:center;text-align:center;gap:5px 12px}
+.why-editorial{display:grid;grid-template-columns:1fr 1fr;gap:0 80px;align-items:start;border-top:1px solid var(--line);padding-block:78px}
+.why-editorial>.eyebrow{grid-column:1/-1}
+.why-editorial>div{color:var(--muted);font-size:15px;line-height:1.9}
+.why-editorial>.availability-note{grid-column:1/-1;margin-top:30px}
+.immersive-why .closing{margin-top:80px}
+.app-capture,.screenshot{isolation:isolate}
+.app-capture>[role=region],.screenshot>[role=region]{z-index:auto;border-radius:inherit}
+.film-backdrop{background:#070b0af2!important;padding:28px;overflow-y:auto;overscroll-behavior:contain}
+.film-dialog{max-width:1000px!important;margin:0!important;color:var(--fg);outline:none}
+.film-modal-title{font-size:18px;line-height:1.4;padding-right:65px;margin:0 0 24px}
+.film-close{top:-10px;right:0;border:1px solid var(--line);border-radius:6px;min-width:44px;min-height:44px;background:var(--bg);color:var(--fg);display:flex;align-items:center;justify-content:center}
+.film-close:hover{background:var(--surface)}
+.film-content{border:1px solid var(--line);border-radius:8px;background:var(--bg);width:100%}
+.film-storyboard{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;padding:46px}
+.storyboard-title h3{font-size:40px;letter-spacing:-.05em;line-height:1.14;margin-bottom:22px}
+.storyboard-title>p:last-child{font-size:14px;line-height:1.8;color:var(--muted)}
+.film-storyboard ol{list-style:none;margin:0;padding:0}
+.film-storyboard li{border-top:1px solid var(--line);padding:18px 0}
+.film-storyboard li>span{display:block;font-size:10px;color:var(--muted);margin-bottom:8px;font-variant-numeric:tabular-nums}
+.film-storyboard li>strong{font-weight:600;font-size:15px}
+.film-storyboard li>p{color:var(--muted);font-size:12px;line-height:1.8;margin:6px 0 0}
+.film-placeholder-note{grid-column:1/-1;margin:0;border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:11px}
+.real-product-film{width:100%;display:block;aspect-ratio:16/9;background:var(--bg)}
+html.video-viewing,html.video-viewing body{overflow:hidden;overscroll-behavior:none}
+.design-lab .page-hero{padding-bottom:60px}
+.lab-heading-control{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:50px 0 35px;padding-block:18px;border-block:1px solid var(--line)}
+.lab-heading-control p{margin:0;font-size:12px;color:var(--muted)}
+.lab-heading-control>div{display:flex;gap:6px}
+.lab-heading-control button{min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--fg);font-size:12px}
+.lab-heading-control button[aria-pressed=true]{background:var(--mint);border-color:var(--mint);color:var(--button-ink)}
+.lab-motion-heading{max-width:900px;font-size:clamp(34px,4.4vw,60px);line-height:1.2;letter-spacing:-.04em}
+.lab-section-title{display:flex;align-items:center;justify-content:space-between;gap:35px;margin-block:45px 30px}
+.lab-section-title h2{margin-bottom:0}
+.lab-section-title>p{color:var(--muted);font-size:14px;max-width:430px}
+.lab-section-title label{display:flex;align-items:center;gap:15px;font-size:12px;color:var(--muted)}
+.lab-section-title input{min-height:44px;accent-color:var(--mint);width:145px}
+.lab-lens{padding-bottom:70px;border-top:1px solid var(--line)}
+.lab-lens img{display:block;width:100%;height:auto}
+.lab-lens>div>[role=region]{border:1px solid var(--line);border-radius:7px;isolation:isolate}
+.design-lab{padding-bottom:70px}
+@media(max-width:1023px){
+  .showcase-hero{padding-block:62px 42px}
+  .showcase-hero h1{font-size:clamp(54px,8.3vw,83px)}
+  .editorial-intro{gap:0 45px;padding-block:80px}
+  .immersive-home .product-section>.wrap{gap:0 35px;grid-template-columns:.65fr 1.35fr}
+  .immersive-home .workflow-copy{display:block}
+  .immersive-home .workflow-copy h3{font-size:30px}
+  .immersive-home .workflow-tabs button{font-size:15px;gap:12px;padding-inline:12px}
+  .intelligence-spotlight{gap:45px;padding-block:80px}
+  .connected-panel{gap:45px;grid-template-columns:.8fr 1.2fr}
+  .why-editorial{gap:0 40px}
+  .film-storyboard{padding:32px;gap:28px}
+}
+@media(max-width:700px){
+  .lab-heading-control,.lab-section-title{align-items:flex-start;flex-direction:column;gap:16px}
+  .lab-section-title h2{font-size:32px}
+  .showcase-hero{padding-block:42px 32px;text-align:left}
+  .showcase-hero .eyebrow{font-size:10px;margin-bottom:24px;max-width:280px}
+  .showcase-hero h1{font-size:clamp(44px,11.8vw,70px);letter-spacing:-.06em;margin-bottom:24px;line-height:1.04}
+  .showcase-hero .intro{font-size:16px;line-height:1.8;margin:0 0 26px}
+  .desktop-break{display:none}
+  .showcase-hero .hero-actions{align-items:stretch;gap:12px;flex-direction:column}
+  .showcase-hero .hero-actions>.text-link{justify-content:center}
+  .showcase-hero .micro{font-size:11px;margin-top:18px}
+  .film-stage{width:calc(100% - 32px)}
+  .product-film>button>img{aspect-ratio:1.5;object-fit:cover;object-position:center}
+  .product-film>button>div>div{width:74px;height:74px}
+  .product-film>button>div>div>div{width:50px;height:50px}
+  .product-film>button>div svg{width:20px;height:20px}
+  .film-caption{align-items:flex-start;gap:6px;flex-direction:column;padding:14px 0 20px;font-size:11px}
+  .editorial-intro{grid-template-columns:1fr;gap:24px;padding-block:65px}
+  .editorial-intro .eyebrow{margin:0}
+  .editorial-intro h2{font-size:37px}
+  .editorial-intro>p:last-child{font-size:15px}
+  .immersive-home .product-section{padding-block:62px 34px}
+  .immersive-home .product-section>.wrap{display:block}
+  .immersive-home .product-section .section-heading{margin-bottom:28px}
+  .immersive-home .workflow-tabs{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);margin-bottom:28px}
+  .immersive-home .workflow-tabs button,.immersive-home .workflow-tabs button:first-child{padding:15px 9px;min-height:58px;font-size:13px;gap:9px;box-shadow:none}
+  .immersive-home .workflow-tabs button[aria-selected=true]{box-shadow:inset 0 -2px var(--mint)}
+  .immersive-home .workflow-tabs button:nth-child(odd){border-right:1px solid var(--line)}
+  .immersive-home .workflow-copy h3{font-size:31px}
+  .immersive-home .workflow-copy>p:not(.eyebrow){font-size:14px;line-height:1.85}
+  .immersive-home .workflow-panel{gap:23px}
+  .immersive-home .workflow-visual figcaption{font-size:10px}
+  .intelligence-spotlight{grid-template-columns:1fr;gap:36px;padding-block:64px}
+  .intelligence-spotlight h2{font-size:38px}
+  .intelligence-spotlight>div>p:not(.eyebrow){font-size:15px}
+  .immersive-why .showcase-hero{padding-bottom:45px}
+  .connected-work{padding-block:52px 10px}
+  .connected-work .section-heading{margin-bottom:36px}
+  .connection-track>button{font-size:11px;min-height:112px;gap:7px}
+  .connection-node{width:44px;height:44px;border-radius:6px}
+  .connection-node svg{width:19px;height:19px}
+  .connection-track:before{top:27px}
+  .connected-panel{grid-template-columns:1fr;gap:28px;padding-block:34px}
+  .connected-panel h3{font-size:32px}
+  .connected-panel>div>p:not(.eyebrow){font-size:14px}
+  .connected-panel .text-link{margin-top:0}
+  .why-editorial{grid-template-columns:1fr;gap:24px;padding-block:55px}
+  .why-editorial .eyebrow{margin-bottom:0}
+  .why-editorial h2{font-size:35px;margin-bottom:0}
+  .why-editorial>.availability-note{margin-top:0}
+  .immersive-why .closing{margin-top:50px}
+  .film-backdrop{padding:18px;align-items:flex-start!important}
+  .film-dialog{margin-top:18px!important}
+  .film-modal-title{font-size:15px;min-height:44px;display:flex;align-items:center;margin-bottom:16px}
+  .film-close{top:0}
+  .film-storyboard{grid-template-columns:1fr;padding:25px;gap:22px}
+  .storyboard-title h3{font-size:32px}
+  .storyboard-title>p:last-child{font-size:13px;margin-bottom:0}
+}
+@media(prefers-reduced-motion:reduce){.product-film *{transition:none!important}.site-progress{transition:none!important}}
+
+/* Selection moves with the user's choice; sticky controls stay within the workflow. */
+.capture-appearance button{position:relative;isolation:isolate}
+.capture-appearance button[aria-pressed=true]{background:transparent}
+.appearance-indicator{position:absolute;inset:0;border-radius:3px;background:var(--mint);z-index:-1;pointer-events:none}
+.appearance-label{position:relative}
+.immersive-home .workflow-tabs{position:sticky;top:104px;align-self:start;background:var(--bg);z-index:10;scroll-margin-top:104px}
+.immersive-home .workflow-tabs button{position:relative;isolation:isolate}
+.immersive-home .workflow-tabs button[aria-selected=true]{background:transparent;box-shadow:none}
+.immersive-home .workflow-tabs .workflow-indicator{position:absolute;inset:0;background:var(--surface);border-left:2px solid var(--mint);pointer-events:none;z-index:-1}
+.immersive-home .workflow-tabs .workflow-label{font-size:inherit;font-weight:inherit;color:inherit}
+.immersive-home .workflow-tabs .workflow-number{flex-shrink:0}
+.immersive-home .workflow-panel{isolation:isolate;scroll-margin-top:210px}
+@media(max-width:1023px){.immersive-home .workflow-tabs{top:88px;scroll-margin-top:88px}}
+@media(max-width:700px){
+ .immersive-home .workflow-tabs{top:80px;scroll-margin-top:80px}
+ .immersive-home .workflow-tabs button[aria-selected=true]{box-shadow:none}
+ .immersive-home .workflow-tabs .workflow-indicator{border-left:0;border-bottom:2px solid var(--mint)}
+}
+.immersive-home #workflow{overflow-anchor:none}
+@media(min-width:701px){.immersive-home .workflow-panel{scroll-margin-top:104px}}
+
+/* Bound sticky navigation to the feature itself, before the section's footer. */
+.immersive-home .workflow-stage{grid-column:1/-1;display:grid;grid-template-columns:.65fr 1.35fr;column-gap:70px;align-items:start;min-width:0}
+.immersive-home .workflow-stage .workflow-tabs,.immersive-home .workflow-stage .workflow-panel{grid-row:1}
+.immersive-home .workflow-stage .workflow-tabs{margin-bottom:0}
+@media(max-width:1023px){.immersive-home .workflow-stage{column-gap:35px}}
+@media(max-width:700px){
+ .immersive-home .workflow-stage{display:block}
+ .immersive-home .workflow-stage .workflow-tabs{margin-bottom:28px}
+}
