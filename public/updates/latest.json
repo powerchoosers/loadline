@@ -1,13 +1,18 @@
-{
-  "version": "0.3.326",
-  "channel": "stable",
-  "platform": "windows-x64",
-  "downloadUrl": "https://github.com/powerchoosers/loadline/releases/download/v0.3.326/loadline-browser-windows-x64-0.3.326.zip",
-  "sizeBytes": 508533341,
-  "sha256": "1ac7ff24f43dbe5d9f52c7c5a41ef539ac1996f290648e1ec47caacdb9a1aa23",
-  "installerDownloadUrl": "https://github.com/powerchoosers/loadline/releases/download/v0.3.326/Loadline-Setup-0.3.326.exe",
-  "installerSizeBytes": 419333453,
-  "installerSha256": "1af6c128b498b9da3cd42da7685c50d169d3f141814138782041c59e1bdb9aa7",
-  "publishedAt": "2026-11-11T19:20:15.1185829Z",
-  "releaseNotesUrl": "https://github.com/powerchoosers/loadline/releases/tag/v0.3.326"
-}
+[
+    "",
+    "Name                           Value                                                                                   ",
+    "----                           -----                                                                                   ",
+    "version                        0.3.332                                                                                 ",
+    "channel                        stable                                                                                  ",
+    "platform                       windows-x64                                                                             ",
+    "downloadUrl                    https://github.com/powerchoosers/loadline/releases/download/v0.3.332/loadline-browser...",
+    "sizeBytes                      507486056                                                                               ",
+    "sha256                         1f5306e4b5cc6a4a97b99a031023c67731f6922816dd61023d646bbb1def5340                        ",
+    "installerDownloadUrl           https://github.com/powerchoosers/loadline/releases/download/v0.3.332/Loadline-Setup-0...",
+    "installerSizeBytes             418078187                                                                               ",
+    "installerSha256                87743726273790a406ded679f144fbb55dee49cb9f5e6d43979b270f8de43b19                        ",
+    "publishedAt                    2026-11-12T14:59:49.5798816Z                                                            ",
+    "releaseNotesUrl                https://github.com/powerchoosers/loadline/releases/tag/v0.3.332                         ",
+    "",
+    ""
+]
