@@ -1,13 +1,13 @@
 {
-  "version": "0.3.334",
+  "version": "0.3.335",
   "channel": "stable",
   "platform": "windows-x64",
-  "downloadUrl": "https://github.com/powerchoosers/loadline/releases/download/v0.3.334/loadline-browser-windows-x64-0.3.334.zip",
-  "sizeBytes": 507280339,
-  "sha256": "cb6a86cf9c516bc143c2b66394b8f3fc8ca9f83c5ce6cbe2dd80c2cae96e49de",
-  "installerDownloadUrl": "https://github.com/powerchoosers/loadline/releases/download/v0.3.334/Loadline-Setup-0.3.334.exe",
-  "installerSizeBytes": 418081817,
-  "installerSha256": "fa636f92984caf431ee53c60f76355c5bcf2e618b0a928ff4f5f0c53cca1a3b3",
-  "publishedAt": "2026-11-13T19:50:58.6527076Z",
-  "releaseNotesUrl": "https://github.com/powerchoosers/loadline/releases/tag/v0.3.334"
+  "downloadUrl": "https://github.com/powerchoosers/loadline/releases/download/v0.3.335/loadline-browser-windows-x64-0.3.335.zip",
+  "sizeBytes": 507280710,
+  "sha256": "fd21a5312c64ce18a7528f4246f72f0b4b1d205246996effb04a46ab12f49340",
+  "installerDownloadUrl": "https://github.com/powerchoosers/loadline/releases/download/v0.3.335/Loadline-Setup-0.3.335.exe",
+  "installerSizeBytes": 418082091,
+  "installerSha256": "06a66487f34019b324f723f22ecc6c18587439044054d84449d7a09b6aa2feb4",
+  "publishedAt": "2026-11-13T20:35:08.6536876Z",
+  "releaseNotesUrl": "https://github.com/powerchoosers/loadline/releases/tag/v0.3.335"
 }
