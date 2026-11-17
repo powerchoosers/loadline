@@ -30,10 +30,23 @@ export function isMapPayload(value) {
       || !(value.primaryId === undefined || boundedString(value.primaryId, 512))
       || !(value.focusedId === undefined || boundedString(value.focusedId, 512))
       || !(value.selected === undefined || value.selected === null || isMapPlace(value.selected))
+      || !(value.purpose === undefined || value.purpose === 'prospecting')
       || !['roadmap', 'satellite'].includes(value.mapType)
       || !(value.is3d === undefined || typeof value.is3d === 'boolean')
       || !(value.scheme === undefined || value.scheme === 'light' || value.scheme === 'dark')) return false;
   try { return JSON.stringify(value).length <= MAX_PAYLOAD_CHARS; } catch { return false; }
+}
+
+export function getMapViewport(value) {
+  const initial = value.places.find(place => place.id === value.focusedId && place.latitude !== null && place.longitude !== null)
+    || value.places.find(place => place.id === value.primaryId && place.latitude !== null && place.longitude !== null)
+    || value.places.find(place => place.latitude !== null && place.longitude !== null);
+  const prospecting = value.purpose === 'prospecting';
+  return {
+    center: initial ? { lat: initial.latitude, lng: initial.longitude }
+      : prospecting ? { lat: 31.2, lng: -99.2 } : { lat: 30.2672, lng: -97.7431 },
+    zoom: prospecting ? (initial ? 15 : 6) : 17,
+  };
 }
 
 export function isTrustedParentMessage(event, parentWindow, trustedOrigins = TRUSTED_PARENT_ORIGINS) {
@@ -242,6 +255,7 @@ function installMapFrame(win, doc) {
   function setSelected(place) {
     selected = place;
     infoWindow?.close();
+    if (payload?.purpose === 'prospecting') return;
     if (place && place.latitude !== null && place.longitude !== null && map && infoWindow) {
       infoWindow.setContent(placeCard(place));
       infoWindow.setPosition({ lat: place.latitude, lng: place.longitude });
@@ -382,9 +396,10 @@ function installMapFrame(win, doc) {
     const focus = payload.places.find(place => place.id === payload.focusedId && place.latitude !== null && place.longitude !== null);
     const primary = payload.places.find(place => place.id === payload.primaryId && place.latitude !== null && place.longitude !== null)
       || payload.places.find(place => place.latitude !== null && place.longitude !== null);
-    if (focus) { map.setCenter({ lat: focus.latitude, lng: focus.longitude }); map.setZoom(17); return; }
+    const zoom = getMapViewport(payload).zoom;
+    if (focus) { map.setCenter({ lat: focus.latitude, lng: focus.longitude }); map.setZoom(zoom); return; }
     const located = payload.places.filter(place => place.latitude !== null && place.longitude !== null);
-    if (located.length === 1) { map.setCenter({ lat: located[0].latitude, lng: located[0].longitude }); map.setZoom(17); return; }
+    if (located.length === 1) { map.setCenter({ lat: located[0].latitude, lng: located[0].longitude }); map.setZoom(zoom); return; }
     if (located.length > 1) {
       const bounds = new win.google.maps.LatLngBounds();
       for (const place of located) bounds.extend({ lat: place.latitude, lng: place.longitude });
@@ -411,10 +426,13 @@ function installMapFrame(win, doc) {
   }
 
   function syncControls() {
+    const prospecting = payload.purpose === 'prospecting';
+    doc.querySelector('#map-type-toggle').hidden = prospecting || is3dViewVisible();
     for (const button of doc.querySelectorAll('[data-map-type]')) {
       button.setAttribute('aria-pressed', String(button.dataset.mapType === payload.mapType));
     }
     const threeDButton = doc.querySelector('#map-3d-toggle');
+    threeDButton.hidden = prospecting;
     threeDButton.disabled = !payload?.places.some(place => place.latitude !== null && place.longitude !== null);
     threeDButton.setAttribute('aria-pressed', String(Boolean(payload.is3d)));
     threeDButton.title = threeDButton.disabled ? 'Add a location with coordinates to use 3D view' : 'Toggle photorealistic 3D view';
@@ -434,12 +452,8 @@ function installMapFrame(win, doc) {
     try {
       await loadMaps(payload.apiKey);
       if (!map) {
-        const initial = payload.places.find(place => place.id === payload.focusedId && place.latitude !== null && place.longitude !== null)
-          || payload.places.find(place => place.id === payload.primaryId && place.latitude !== null && place.longitude !== null)
-          || payload.places.find(place => place.latitude !== null && place.longitude !== null);
         map = new win.google.maps.Map(mapNode, {
-          center: initial ? { lat: initial.latitude, lng: initial.longitude } : { lat: 30.2672, lng: -97.7431 },
-          zoom: 17,
+          ...getMapViewport(payload),
           mapTypeId: payload.mapType,
           renderingType: win.google.maps.RenderingType.VECTOR,
           gestureHandling: 'greedy', mapTypeControl: false, fullscreenControl: false,
@@ -458,7 +472,7 @@ function installMapFrame(win, doc) {
           send({ type: 'loadline-map-map-ready' });
         });
       }
-      const locationKey = JSON.stringify([payload.primaryId, payload.focusedId, payload.places.map(place => [place.id, place.latitude, place.longitude, place.name])]);
+      const locationKey = JSON.stringify([payload.purpose, payload.primaryId, payload.focusedId, payload.places.map(place => [place.id, place.latitude, place.longitude, place.name])]);
       const locationsChanged = locationKey !== lastLocationKey;
       if (locationsChanged) {
         lastLocationKey = locationKey;
@@ -510,7 +524,9 @@ function installMapFrame(win, doc) {
     const primary = primaryLocation();
     if (primary && primary.latitude !== null && primary.longitude !== null) {
       if (payload?.is3d && map3d) { map3d.center = { lat: primary.latitude, lng: primary.longitude, altitude: 0 }; map3d.range = 1400; map3d.tilt = 66; map3d.heading = -24; }
-      else { map?.panTo({ lat: primary.latitude, lng: primary.longitude }); map?.setZoom(17); }
+      else { map?.panTo({ lat: primary.latitude, lng: primary.longitude }); map?.setZoom(getMapViewport(payload).zoom); }
+    } else if (payload?.purpose === 'prospecting') {
+      map?.setCenter({ lat: 31.2, lng: -99.2 }); map?.setZoom(6);
     }
   });
   doc.querySelector('#map-zoom-in').addEventListener('click', () => payload?.is3d ? set3dRange(0.72) : map?.setZoom(Math.min(21, (map.getZoom() || 17) + 1)));

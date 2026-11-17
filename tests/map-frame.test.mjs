@@ -7,7 +7,7 @@ const html = await readFile(new URL('../public/map-frame.html', import.meta.url)
 const css = await readFile(new URL('../public/map-frame.css', import.meta.url), 'utf8');
 const hosting = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
-const { isMapPayload, isMapPlace, isTrustedParentMessage } = await import(moduleUrl);
+const { isMapPayload, isMapPlace, isTrustedParentMessage, getMapViewport } = await import(moduleUrl);
 const mapFrameHeaders = hosting.headers.find(entry => entry.source === '/map-frame.html')?.headers || [];
 const mapFramePolicy = mapFrameHeaders.find(header => header.key === 'Content-Security-Policy')?.value || '';
 
@@ -32,6 +32,23 @@ test('the frame validates bounded map data and geographic coordinates', () => {
   assert.equal(isMapPlace({ ...place, longitude: Infinity }), false);
   assert.equal(isMapPlace({ ...place, name: 'x'.repeat(301) }), false);
   assert.equal(isMapPayload({ ...payload, places: Array(1_001).fill(place) }), false);
+});
+
+test('prospecting accepts an empty overview and preserves account payload validation', () => {
+  assert.equal(isMapPayload({ ...payload, purpose: 'prospecting', places: [] }), true);
+  assert.equal(isMapPayload({ ...payload, purpose: 'prospecting' }), true);
+  for (const purpose of ['account', 'other', null, true]) assert.equal(isMapPayload({ ...payload, purpose }), false);
+  assert.equal(isMapPayload({ ...payload, purpose: 'prospecting', places: [{ ...place, latitude: 91 }] }), false);
+  assert.equal(isMapPayload(payload), true);
+});
+
+test('prospecting begins with a Texas overview and focuses selected places at the original search zoom', () => {
+  assert.deepEqual(getMapViewport({ ...payload, purpose: 'prospecting', places: [] }), { center: { lat: 31.2, lng: -99.2 }, zoom: 6 });
+  assert.deepEqual(getMapViewport({ ...payload, purpose: 'prospecting' }), { center: { lat: 32.8, lng: -96.8 }, zoom: 15 });
+  const focused = { ...place, id: 'focused', latitude: 29.7, longitude: -95.4 };
+  assert.deepEqual(getMapViewport({ ...payload, purpose: 'prospecting', places: [place, focused], focusedId: focused.id }), { center: { lat: 29.7, lng: -95.4 }, zoom: 15 });
+  assert.deepEqual(getMapViewport(payload), { center: { lat: 32.8, lng: -96.8 }, zoom: 17 });
+  assert.deepEqual(getMapViewport({ ...payload, places: [] }), { center: { lat: 30.2672, lng: -97.7431 }, zoom: 17 });
 });
 
 test('the hosted HTML sandbox exposes the 3D map and permits its Maps 3D runtime', () => {
