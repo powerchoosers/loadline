@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
-const globalRule = config.headers.find(entry => entry.source === '/((?!map-frame\\.html$).*)');
+const globalRule = config.headers.find(entry => entry.headers.some(header => header.key === 'X-Frame-Options' && header.value === 'DENY'));
 const globalHeaders = globalRule?.headers ?? [];
 const header = name => globalHeaders.find(entry => entry.key.toLowerCase() === name.toLowerCase())?.value;
 
@@ -34,7 +34,7 @@ test('email callback responses are not cached or indexed', () => {
   assert.ok(callbackHeaders.some(entry => entry.key.toLowerCase() === 'x-robots-tag' && entry.value === 'noindex, nofollow'));
 });
 
-test('the hosted map only allows the Loadline extension to frame it', () => {
+test('the browser map retains its approved parent policy and avoids generic framing denial', () => {
   const mapRule = config.headers.find(entry => entry.source === '/map-frame.html');
   const mapHeaders = mapRule?.headers ?? [];
   const mapHeader = name => mapHeaders.find(entry => entry.key.toLowerCase() === name.toLowerCase())?.value;
@@ -50,6 +50,7 @@ test('the hosted map only allows the Loadline extension to frame it', () => {
 
   const appliesToPage = new RegExp(`^${globalRule.source}$`);
   assert.equal(appliesToPage.test('/map-frame.html'), false);
+  assert.equal(appliesToPage.test('/desktop-map-frame.html'), false);
   for (const path of ['/', '/download/', '/auth-confirmed.html', '/map-frame.js']) {
     assert.equal(appliesToPage.test(path), true, `global security headers must still cover ${path}`);
   }

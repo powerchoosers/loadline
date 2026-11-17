@@ -42,6 +42,50 @@ export function isTrustedParentMessage(event, parentWindow, trustedOrigins = TRU
   return event.data.type === 'loadline-map-theme' && (event.data.scheme === 'light' || event.data.scheme === 'dark');
 }
 
+export function isMapMessage(value) {
+  if (!isRecord(value)) return false;
+  if (value.type === 'loadline-map-init') return isMapPayload(value.payload);
+  return value.type === 'loadline-map-theme' && (value.scheme === 'light' || value.scheme === 'dark');
+}
+
+export function isTrustedDesktopConnection(event, parentWindow, pathname) {
+  return pathname === '/desktop-map-frame.html'
+    && event?.origin === 'null' && event.source === parentWindow
+    && isRecord(event.data) && event.data.type === 'loadline-map-connect' && Object.keys(event.data).length === 1
+    && event.ports?.length === 1 && event.ports[0] instanceof MessagePort;
+}
+
+export function createMapFrameTransport(win, receive) {
+  const desktop = win.location.pathname === '/desktop-map-frame.html';
+  let desktopPort;
+  let parentOrigin = '';
+  const connect = event => {
+    if (desktop) {
+      // file: parents have an opaque origin. Bind one private channel from the
+      // immediate parent, rather than trusting window messages from "null".
+      if (desktopPort || win.parent === win || !isTrustedDesktopConnection(event, win.parent, win.location.pathname)) return;
+      desktopPort = event.ports[0];
+      desktopPort.onmessage = ({ data }) => { if (isMapMessage(data)) receive(data); };
+      desktopPort.start();
+      return;
+    }
+    if (!isTrustedParentMessage(event, win.parent)) return;
+    parentOrigin = event.origin;
+    receive(event.data);
+  };
+  win.addEventListener('message', connect);
+  return {
+    send(message) {
+      if (desktopPort) desktopPort.postMessage(message);
+      else if (!desktop && parentOrigin) win.parent.postMessage(message, parentOrigin);
+    },
+    close() {
+      win.removeEventListener('message', connect);
+      if (desktopPort) { desktopPort.onmessage = null; desktopPort.close(); }
+    },
+  };
+}
+
 function installMapFrame(win, doc) {
   const shell = doc.querySelector('#map-shell');
   const mapNode = doc.querySelector('#map');
@@ -64,9 +108,15 @@ function installMapFrame(win, doc) {
   let last3dLocationKey = '';
   let last3dTargetKey = '';
   let map3dSettled = false;
-  let parentOrigin = '';
-
-  const send = message => { if (parentOrigin) win.parent.postMessage(message, parentOrigin); };
+  const transport = createMapFrameTransport(win, message => {
+    if (message.type === 'loadline-map-theme') {
+      doc.documentElement.dataset.workspaceScheme = message.scheme;
+      return;
+    }
+    void applyPayload(message.payload);
+  });
+  win.addEventListener('pagehide', () => transport.close(), { once: true });
+  const send = message => transport.send(message);
   const showError = message => { error.textContent = message; error.hidden = false; status.hidden = true; };
   const hideError = () => { error.textContent = ''; error.hidden = true; };
   const safeMapsUrl = value => {
@@ -473,15 +523,6 @@ function installMapFrame(win, doc) {
   doc.querySelector('#map-zoom-in').append(icon('plus'));
   doc.querySelector('#map-zoom-out').append(icon('minus'));
   win.gm_authFailure = () => showError('Google Maps could not authorize this map. Contact Loadline support if it continues.');
-  win.addEventListener('message', event => {
-    if (!isTrustedParentMessage(event, win.parent)) return;
-    parentOrigin = event.origin;
-    if (event.data.type === 'loadline-map-theme') {
-      doc.documentElement.dataset.workspaceScheme = event.data.scheme;
-      return;
-    }
-    void applyPayload(event.data.payload);
-  });
 }
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') installMapFrame(window, document);
