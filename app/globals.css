@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --page: #131313;
   --surface: #191919;
   --raised: #282828;
@@ -255,6 +255,9 @@ h1, h2, h3, .inside-list dt {
 .site-footer-legal { margin-top: clamp(40px, 7vh, 72px); padding-top: 20px; border-top: 1px solid var(--line); color: var(--faint); font-size: 0.8125rem; }
 
 /* Inner pages */
+.site-footer-legal a { display: inline-block; margin-left: 14px; color: var(--muted); text-decoration: underline; text-underline-offset: 4px; transition: color 160ms ease-out; }
+.site-footer-legal a:hover { color: var(--text); }
+.topic dd a.page-note-link, .page-note a.page-note-link { color: var(--mint); text-decoration: underline; text-underline-offset: 4px; overflow-wrap: anywhere; }
 .page-hero { padding: clamp(120px, 20vh, 190px) 0 0; border-bottom: 1px solid var(--line); }
 .page-hero-copy { padding: 0 var(--gutter); max-width: calc(900px + var(--gutter) * 2); }
 .page-hero h1 { font-size: clamp(2.5rem, 5.6vw, 4.75rem); line-height: 1; letter-spacing: -0.04em; }

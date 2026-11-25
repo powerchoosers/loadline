@@ -36,7 +36,7 @@ export default function Footer() {
           <a href="https://loadlinehq.com">Loadline browser</a>
         </nav>
       </div>
-      <p className="site-footer-legal">© 2026 Loadline. Product screens on this site are simplified and use sample data.</p>
+      <p className="site-footer-legal">© 2026 Loadline. Product screens on this site are simplified and use sample data. <Link href="/privacy">Privacy Policy</Link> <Link href="/terms">Terms of Service</Link></p>
     </footer>
   );
 }

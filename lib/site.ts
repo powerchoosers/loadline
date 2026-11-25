@@ -3,5 +3,5 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3
 
 export const ROUTES = [
   '', '/features', '/lead-desk', '/intelligence', '/market', '/use-cases', '/pricing',
-  '/security', '/getting-started', '/faq', '/download', '/changelog',
+  '/security', '/getting-started', '/faq', '/download', '/changelog', '/privacy', '/terms',
 ];
